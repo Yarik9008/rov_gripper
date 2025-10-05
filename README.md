@@ -117,7 +117,7 @@ NRST    →    NRST
 **Проблема**: "Maple DFU" в диспетчере устройств
 - Микроконтроллер в режиме загрузчика
 - Отключите USB питание, используйте только ST-Link
-- Выполните: `pio run -e stm32f103 -t upload --upload-flags="--reset --halt"`
+- Выполните: `pio run -e stm32f103 -t upload`
 - Или используйте STM32CubeProgrammer для принудительной загрузки
 
 **Проблема**: "No ST-Link detected"
@@ -150,7 +150,7 @@ NRST    →    NRST
 3. **Питание только от ST-Link** (3.3V)
 4. **Выполните команду**:
    ```bash
-   pio run -e stm32f103 -t upload --upload-flags="--reset --halt"
+   pio run -e stm32f103 -t upload
    ```
 
 #### Решение 2: STM32CubeProgrammer
@@ -170,7 +170,7 @@ NRST    →    NRST
 # Очистка и перекомпиляция
 pio run -e stm32f103 -t clean
 pio run -e stm32f103
-pio run -e stm32f103 -t upload --upload-flags="--reset --halt --no-verify"
+pio run -e stm32f103 -t upload
 ```
 
 ### Альтернативные методы прошивки
