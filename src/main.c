@@ -1,18 +1,19 @@
 #include <Arduino.h>
 
-// put function declarations here:
-int myFunction(int, int);
+// Определение пина для светодиода (PB5 - пин 13 на STM8S103)
+#define LED_PIN PB5
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+  // Настройка пина светодиода как выход
+  pinMode(LED_PIN, OUTPUT);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-}
-
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  // Включить светодиод
+  digitalWrite(LED_PIN, HIGH);
+  delay(500);  // Пауза 500 мс
+  
+  // Выключить светодиод
+  digitalWrite(LED_PIN, LOW);
+  delay(500);  // Пауза 500 мс
 }
