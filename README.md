@@ -11,6 +11,7 @@
 - **Мигание светодиодом** - базовая программа для тестирования работы микроконтроллера
 - Светодиод подключен к пину PC13 (встроенный светодиод на BluePill)
 - Интервал мигания: 500 мс включено / 500 мс выключено
+- **Поддержка Serial монитора** через UART (PA9/PA10)
 
 ## Технические характеристики
 
@@ -68,6 +69,119 @@ pio run -e stm32f103 -t clean
 # Мониторинг последовательного порта
 pio device monitor
 ```
+
+## Настройка COM-порта для STM32F103
+
+### Метод 1: USB Virtual COM Port (VCP) - Рекомендуется
+
+Для того чтобы STM32F103 определялся как COM-порт, нужно настроить USB Virtual COM Port:
+
+#### Шаг 1: Обновите код для поддержки Serial
+```cpp
+#include <Arduino.h>
+
+#define LED_PIN PC13
+
+void setup() {
+  pinMode(LED_PIN, OUTPUT);
+  
+  // Инициализация Serial порта
+  Serial.begin(115200);
+  
+  Serial.println("ROV Gripper STM32F103 - Started");
+}
+
+void loop() {
+  digitalWrite(LED_PIN, HIGH);
+  Serial.println("LED ON");
+  delay(500);
+  
+  digitalWrite(LED_PIN, LOW);
+  Serial.println("LED OFF");
+  delay(500);
+}
+```
+
+#### Шаг 2: Обновите platformio.ini
+```ini
+[env:stm32f103]
+platform = ststm32
+board = bluepill_f103c8
+framework = arduino
+upload_protocol = stlink
+debug_tool = stlink
+debug_init_break = tbreak setup
+build_flags = 
+    -DHAL_PCD_MODULE_ENABLED
+    -DUSE_USB_FS
+    -DUSBD_VID=0x0483
+    -DUSBD_PID=0x5740
+```
+
+#### Шаг 3: Установите драйверы USB VCP
+- **STM32CubeIDE** с драйверами USB VCP
+- **Или скачайте драйверы** с сайта ST
+
+#### Шаг 4: Проверьте COM-порт
+```bash
+# После прошивки проверьте устройства
+pio device list
+
+# Должно появиться:
+# COM9
+# Hardware ID: USB\VID_0483&PID_5740
+# Description: STM32 Virtual COM Port
+```
+
+### Метод 2: UART через USB-UART адаптер
+
+Если USB VCP не работает, используйте USB-UART адаптер:
+
+#### Подключение:
+```
+STM32F103    USB-UART адаптер
+---------    -----------------
+PA9 (TX)  →  RX
+PA10 (RX) →  TX
+GND       →  GND
+3.3V      →  3.3V (опционально)
+```
+
+#### Настройка Serial монитора:
+```bash
+# Мониторинг с указанием порта
+pio device monitor --port COM3 --baud 115200
+```
+
+### Метод 3: Через ST-Link Virtual COM Port
+
+Некоторые ST-Link имеют встроенный Virtual COM Port:
+
+#### Проверьте ST-Link:
+```bash
+pio device list
+
+# Ищите:
+# ST-Link Virtual COM Port
+# Hardware ID: USB\VID_0483&PID_3748
+```
+
+### Решение проблем с COM-портом
+
+**Проблема**: STM32 не определяется как COM-порт
+- Установите драйверы USB VCP
+- Проверьте подключение USB кабеля
+- Попробуйте другой USB порт
+
+**Проблема**: COM-порт появляется, но нет данных
+- Проверьте скорость передачи (115200 baud)
+- Убедитесь, что Serial.begin() вызван в setup()
+- Проверьте подключение TX/RX
+
+**Проблема**: "Access denied" при открытии COM-порта
+- Закройте другие программы, использующие порт
+- Перезагрузите STM32F103
+- Попробуйте другой COM-порт
 
 ## Подробная инструкция по подключению STM32 к ST-Link V2
 
